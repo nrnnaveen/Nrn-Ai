@@ -115,7 +115,7 @@ export function initChat({
       }
     }
 
-    // Render optimistic user message
+    // Render optimistic user message (this clears the empty welcome state)
     const tempUserMsg = {
       id: 'temp_user_' + Date.now(),
       role: 'user',
@@ -224,7 +224,7 @@ export function initChat({
       </div>
     `;
 
-    // Bind suggestion clicks
+    // Bind suggestion clicks & touches
     messagesContainer.querySelectorAll('.suggestion-card').forEach((card) => {
       card.addEventListener('click', () => {
         const promptText = card.getAttribute('data-prompt');
@@ -542,6 +542,9 @@ export function initChat({
       showToast(`Failed to load messages: ${err.message}`, 'error');
     }
   }
+
+  // Render initial empty welcome screen right away
+  loadConversationMessages(null);
 
   return {
     loadConversationMessages,
