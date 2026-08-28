@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>NRN AI</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="stylesheet" href="/css/tokens.css">
@@ -18,16 +18,26 @@
     <!-- Mobile Sidebar Backdrop -->
     <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
 
-    <!-- Sidebar Shell -->
+    <!-- Sidebar Shell with Drag Resizer -->
     <aside class="app-sidebar" id="app-sidebar" aria-label="Chat navigation">
+      <!-- Draggable resize handle (desktop only) -->
+      <div class="sidebar-resizer" id="sidebar-resizer" title="Drag to resize sidebar (Double-click to reset)"></div>
+
       <div class="sidebar-header">
         <a href="/app" class="brand-link">
           <img src="/favicon.svg" alt="NRN AI Logo" class="brand-icon">
           <span>NRN AI</span>
         </a>
-        <button class="btn-icon mobile-menu-btn" id="close-sidebar-btn" aria-label="Close sidebar" style="display:none;">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-        </button>
+        <div style="display:flex;align-items:center;gap:2px;">
+          <!-- Desktop Collapse Button -->
+          <button class="btn-icon" id="collapse-sidebar-btn" title="Hide sidebar (⌘B)" aria-label="Hide sidebar">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/><path d="m14 9-3 3 3 3"/></svg>
+          </button>
+          <!-- Mobile Close Button -->
+          <button class="btn-icon" id="close-sidebar-btn" aria-label="Close sidebar">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+          </button>
+        </div>
       </div>
 
       <div class="sidebar-actions">
@@ -56,8 +66,11 @@
 
       <!-- Group Mode Separate Link Section -->
       <div class="sidebar-group-section">
-        <a href="/group" class="group-room-link">
-          <span>Group Rooms</span>
+        <a href="/group" class="group-room-link" title="Open Multi-User Group Rooms">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            <span>Group Rooms</span>
+          </div>
           <span class="badge">General</span>
         </a>
       </div>
@@ -93,10 +106,12 @@
     <main class="app-main">
       <header class="app-header">
         <div class="header-left">
-          <button class="btn-icon mobile-menu-btn" id="open-sidebar-btn" aria-label="Open sidebar">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+          <!-- Toggle Sidebar (Desktop & Mobile) -->
+          <button class="btn-icon" id="header-sidebar-toggle-btn" title="Toggle sidebar (⌘B)" aria-label="Toggle sidebar">
+            <svg class="icon-desktop-toggle" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/><path d="m11 9 3 3-3 3"/></svg>
+            <svg class="icon-mobile-toggle" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
           </button>
-          <span class="modal-title" id="chat-title" style="cursor:pointer;max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="Click to rename">
+          <span class="modal-title" id="chat-title" style="cursor:pointer;" title="Click to rename">
             New Conversation
           </span>
         </div>
@@ -234,7 +249,7 @@
         sidebarContainer
       });
 
-      // 7. Initialize Sidebar
+      // 7. Initialize Sidebar (Includes Drag Resizer & Collapse Toggle)
       await initSidebar({
         container: sidebarContainer,
         newChatBtn,
@@ -285,24 +300,17 @@
       });
 
       // 11. Mobile Drawer
-      const openDrawerBtn = document.getElementById('open-sidebar-btn');
       const closeDrawerBtn = document.getElementById('close-sidebar-btn');
       const sidebarEl = document.getElementById('app-sidebar');
       const backdropEl = document.getElementById('sidebar-backdrop');
 
-      openDrawerBtn.addEventListener('click', () => {
-        sidebarEl.classList.add('open');
-        backdropEl.classList.add('open');
-        closeDrawerBtn.style.display = 'flex';
-      });
-
       const closeDrawer = () => {
         sidebarEl.classList.remove('open');
-        backdropEl.classList.remove('open');
+        if (backdropEl) backdropEl.classList.remove('open');
       };
 
-      closeDrawerBtn.addEventListener('click', closeDrawer);
-      backdropEl.addEventListener('click', closeDrawer);
+      if (closeDrawerBtn) closeDrawerBtn.addEventListener('click', closeDrawer);
+      if (backdropEl) backdropEl.addEventListener('click', closeDrawer);
     });
   </script>
 </body>

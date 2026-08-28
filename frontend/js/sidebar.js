@@ -1,5 +1,5 @@
 // ==========================================================================
-// NRN AI — SIDEBAR CONTROLLER & DATE GROUPING
+// NRN AI — SIDEBAR CONTROLLER, RESIZER & DATE GROUPING
 // Linear / Claude / Notion / Apple Restrained Design Language
 // ==========================================================================
 
@@ -10,6 +10,10 @@ let conversations = [];
 let activeConversationId = null;
 let onSelectConversationCallback = null;
 let onNewChatCallback = null;
+
+const DEFAULT_SIDEBAR_WIDTH = 260;
+const MIN_SIDEBAR_WIDTH = 200;
+const MAX_SIDEBAR_WIDTH = 480;
 
 export async function initSidebar({
   container,
@@ -22,7 +26,11 @@ export async function initSidebar({
   onSelectConversationCallback = onSelectConversation;
   onNewChatCallback = onNewChat;
 
-  // New Chat action
+  // 1. Initialize Sidebar Resizer & Collapse Systems
+  initSidebarResizer();
+  initSidebarToggle();
+
+  // 2. New Chat action
   newChatBtn.addEventListener('click', () => {
     setActiveConversationId(null);
     if (onNewChatCallback) {
@@ -31,7 +39,7 @@ export async function initSidebar({
     closeMobileSidebar();
   });
 
-  // Search input
+  // 3. Search input
   if (searchInput) {
     searchInput.addEventListener('input', (e) => {
       const q = e.target.value.trim().toLowerCase();
@@ -51,10 +59,10 @@ export async function initSidebar({
     }
   }
 
-  // Global keyboard shortcuts
+  // 4. Global keyboard shortcuts
   document.addEventListener('keydown', (e) => {
     // Cmd/Ctrl + K -> Focus search
-    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+    if ((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'K')) {
       e.preventDefault();
       if (searchInput) {
         searchInput.focus();
@@ -67,11 +75,121 @@ export async function initSidebar({
       e.preventDefault();
       newChatBtn.click();
     }
+
+    // Cmd/Ctrl + B -> Toggle sidebar
+    if ((e.ctrlKey || e.metaKey) && (e.key === 'b' || e.key === 'B')) {
+      e.preventDefault();
+      toggleSidebar();
+    }
   });
 
-  // Load past conversations from API
+  // 5. Load past conversations from API
   await reloadConversations(container);
   await loadUserProfile();
+}
+
+/**
+ * Initializes adjustable sidebar drag handle (col-resize)
+ */
+function initSidebarResizer() {
+  const sidebar = document.getElementById('app-sidebar');
+  const resizer = document.getElementById('sidebar-resizer');
+  if (!sidebar || !resizer) return;
+
+  // Restore saved width on desktop
+  const savedWidth = localStorage.getItem('nrn_sidebar_width');
+  if (savedWidth && window.innerWidth > 768) {
+    const widthNum = parseInt(savedWidth, 10);
+    if (!isNaN(widthNum) && widthNum >= MIN_SIDEBAR_WIDTH && widthNum <= MAX_SIDEBAR_WIDTH) {
+      sidebar.style.width = `${widthNum}px`;
+    }
+  }
+
+  let isDragging = false;
+
+  const startDrag = (clientX) => {
+    if (window.innerWidth <= 768) return;
+    isDragging = true;
+    document.body.classList.add('is-resizing-sidebar');
+  };
+
+  const onDrag = (clientX) => {
+    if (!isDragging || window.innerWidth <= 768) return;
+    const clampedWidth = Math.min(Math.max(clientX, MIN_SIDEBAR_WIDTH), MAX_SIDEBAR_WIDTH);
+    sidebar.style.width = `${clampedWidth}px`;
+  };
+
+  const stopDrag = () => {
+    if (!isDragging) return;
+    isDragging = false;
+    document.body.classList.remove('is-resizing-sidebar');
+    const finalWidth = sidebar.offsetWidth;
+    if (finalWidth >= MIN_SIDEBAR_WIDTH && finalWidth <= MAX_SIDEBAR_WIDTH && window.innerWidth > 768) {
+      localStorage.setItem('nrn_sidebar_width', finalWidth.toString());
+    }
+  };
+
+  // Mouse drag
+  resizer.addEventListener('mousedown', (e) => {
+    e.preventDefault();
+    startDrag(e.clientX);
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    onDrag(e.clientX);
+  });
+
+  document.addEventListener('mouseup', stopDrag);
+
+  // Double-click to reset to default
+  resizer.addEventListener('dblclick', () => {
+    if (window.innerWidth <= 768) return;
+    sidebar.style.width = `${DEFAULT_SIDEBAR_WIDTH}px`;
+    localStorage.setItem('nrn_sidebar_width', DEFAULT_SIDEBAR_WIDTH.toString());
+    showToast('Sidebar width reset to default.', 'success');
+  });
+}
+
+/**
+ * Initializes show/hide sidebar toggle controls
+ */
+function initSidebarToggle() {
+  const sidebar = document.getElementById('app-sidebar');
+  const collapseBtn = document.getElementById('collapse-sidebar-btn');
+  const headerToggleBtn = document.getElementById('header-sidebar-toggle-btn');
+  if (!sidebar) return;
+
+  // Restore collapsed state on desktop only
+  const isCollapsed = localStorage.getItem('nrn_sidebar_collapsed') === 'true';
+  if (isCollapsed && window.innerWidth > 768) {
+    sidebar.classList.add('collapsed');
+  }
+
+  if (collapseBtn) {
+    collapseBtn.addEventListener('click', toggleSidebar);
+  }
+
+  if (headerToggleBtn) {
+    headerToggleBtn.addEventListener('click', toggleSidebar);
+  }
+}
+
+export function toggleSidebar() {
+  const sidebar = document.getElementById('app-sidebar');
+  const backdrop = document.getElementById('sidebar-backdrop');
+  if (!sidebar) return;
+
+  if (window.innerWidth <= 768) {
+    // Mobile drawer toggle
+    const isOpen = sidebar.classList.toggle('open');
+    if (backdrop) {
+      backdrop.classList.toggle('open', isOpen);
+    }
+  } else {
+    // Desktop collapse toggle
+    const isCollapsed = sidebar.classList.toggle('collapsed');
+    localStorage.setItem('nrn_sidebar_collapsed', isCollapsed ? 'true' : 'false');
+  }
 }
 
 export async function reloadConversations(container) {
@@ -248,8 +366,8 @@ async function loadUserProfile() {
 }
 
 export function closeMobileSidebar() {
-  const sidebar = document.querySelector('.app-sidebar');
-  const backdrop = document.querySelector('.sidebar-backdrop');
+  const sidebar = document.getElementById('app-sidebar');
+  const backdrop = document.getElementById('sidebar-backdrop');
   if (sidebar) sidebar.classList.remove('open');
   if (backdrop) backdrop.classList.remove('open');
 }

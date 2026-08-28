@@ -10,23 +10,42 @@
   display: flex;
   flex-direction: column;
   height: 100vh;
+  position: relative;
   z-index: 40;
   transition: transform var(--duration-normal) var(--ease-out), width var(--duration-normal) var(--ease-out);
 }
 
-.app-sidebar.collapsed {
-  width: 0;
-  overflow: hidden;
-  border-right: none;
+/* Sidebar Resizer Handle */
+.sidebar-resizer {
+  position: absolute;
+  top: 0;
+  right: -3px;
+  width: 6px;
+  height: 100%;
+  cursor: col-resize;
+  z-index: 50;
+  transition: background-color var(--transition-fast);
+}
+
+.sidebar-resizer:hover,
+body.is-resizing-sidebar .sidebar-resizer {
+  background-color: var(--color-accent);
+}
+
+@media (max-width: 768px) {
+  .sidebar-resizer {
+    display: none !important;
+  }
 }
 
 .sidebar-header {
   height: 48px;
-  padding: 0 var(--sp-4);
+  padding: 0 var(--sp-3) 0 var(--sp-4);
   display: flex;
   align-items: center;
   justify-content: space-between;
   border-bottom: 1px solid var(--color-border-subtle);
+  flex-shrink: 0;
 }
 
 .brand-link {
@@ -51,6 +70,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--sp-2);
+  flex-shrink: 0;
 }
 
 .new-chat-btn {
@@ -69,12 +89,17 @@
   padding: 0 var(--sp-3);
   cursor: pointer;
   box-shadow: var(--shadow-xs);
-  transition: background-color var(--transition-fast), border-color var(--transition-fast);
+  touch-action: manipulation;
+  transition: background-color var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
 }
 
 .new-chat-btn:hover {
   background-color: var(--color-surface-hover);
   border-color: var(--color-border-strong);
+}
+
+.new-chat-btn:active {
+  transform: scale(0.98);
 }
 
 .search-box {
@@ -173,6 +198,7 @@
   cursor: pointer;
   text-decoration: none;
   position: relative;
+  touch-action: manipulation;
   transition: background-color var(--transition-fast), color var(--transition-fast);
 }
 
@@ -243,24 +269,43 @@
 .sidebar-group-section {
   padding: var(--sp-2) var(--sp-3);
   border-top: 1px solid var(--color-border-subtle);
+  flex-shrink: 0;
 }
 
 .group-room-link {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--sp-2) var(--sp-2);
-  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  border-radius: var(--radius-md);
   text-decoration: none;
-  color: var(--color-text-muted);
+  color: var(--color-text);
   font-size: var(--fs-xs);
   font-weight: 500;
-  transition: background-color var(--transition-fast), color var(--transition-fast);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-xs);
+  touch-action: manipulation;
+  transition: background-color var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
 }
 
 .group-room-link:hover {
   background-color: var(--color-surface-hover);
-  color: var(--color-text);
+  border-color: var(--color-border-strong);
+}
+
+.group-room-link:active {
+  transform: scale(0.98);
+}
+
+.group-room-link .badge {
+  background-color: var(--color-accent-subtle);
+  color: var(--color-accent);
+  border: 1px solid var(--color-accent-border);
+  font-weight: 600;
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
 }
 
 /* User Footer & Popover */
@@ -268,6 +313,7 @@
   padding: var(--sp-2) var(--sp-3);
   border-top: 1px solid var(--color-border-subtle);
   position: relative;
+  flex-shrink: 0;
 }
 
 .user-profile-btn {
@@ -370,36 +416,4 @@
 
 .user-menu-item.danger:hover {
   color: var(--color-danger);
-}
-
-/* Mobile Sidebar Drawer */
-@media (max-width: 768px) {
-  .app-sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    transform: translateX(-100%);
-    box-shadow: var(--shadow-3);
-  }
-
-  .app-sidebar.open {
-    transform: translateX(0);
-  }
-
-  .sidebar-backdrop {
-    position: fixed;
-    inset: 0;
-    background-color: rgba(0, 0, 0, 0.4);
-    backdrop-filter: blur(2px);
-    z-index: 35;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity var(--duration-normal) var(--ease-out);
-  }
-
-  .sidebar-backdrop.open {
-    opacity: 1;
-    pointer-events: auto;
-  }
 }
