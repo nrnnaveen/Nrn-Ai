@@ -1,157 +1,128 @@
+// ==========================================================================
+// NRN AI — AUTH CONTROLLER
+// ==========================================================================
+
 import { api } from './api.js';
+import { initThemeSystem } from './theme.js';
+import { icons } from './ui.js';
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Check if session expired banner should be shown
-  const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get('expired')) {
-    const banner = document.getElementById('auth-banner');
-    if (banner) {
-      banner.className = 'auth-banner error';
-      banner.textContent = 'Your session has expired. Please log in again.';
-      banner.style.display = 'block';
-    }
-  }
+  initThemeSystem();
 
   const loginForm = document.getElementById('login-form');
   const registerForm = document.getElementById('register-form');
+  const banner = document.getElementById('auth-banner');
+  const togglePassBtn = document.getElementById('toggle-password-btn');
+  const passwordInput = document.getElementById('password');
+  const strengthFill = document.getElementById('strength-fill');
 
-  if (loginForm) {
-    initLoginForm(loginForm);
+  // Password visibility toggle
+  if (togglePassBtn && passwordInput) {
+    togglePassBtn.addEventListener('click', () => {
+      const isPassword = passwordInput.getAttribute('type') === 'password';
+      passwordInput.setAttribute('type', isPassword ? 'text' : 'password');
+      togglePassBtn.innerHTML = isPassword ? icons.eyeOff : icons.eye;
+    });
   }
 
+  // Password strength meter on register
+  if (passwordInput && strengthFill) {
+    passwordInput.addEventListener('input', () => {
+      const val = passwordInput.value;
+      let score = 0;
+      if (val.length >= 8) score++;
+      if (/[A-Z]/.test(val) && /[a-z]/.test(val)) score++;
+      if (/\d/.test(val) && /[^A-Za-z0-9]/.test(val)) score++;
+
+      strengthFill.className = 'password-strength-fill';
+      if (val.length > 0) {
+        if (score === 1) strengthFill.classList.add('weak');
+        else if (score === 2) strengthFill.classList.add('medium');
+        else if (score >= 3) strengthFill.classList.add('strong');
+      }
+    });
+  }
+
+  function showError(msg) {
+    if (!banner) return;
+    banner.textContent = msg;
+    banner.classList.add('visible');
+  }
+
+  function clearError() {
+    if (!banner) return;
+    banner.textContent = '';
+    banner.classList.remove('visible');
+  }
+
+  function setButtonLoading(btn, loading, defaultText) {
+    if (!btn) return;
+    btn.disabled = loading;
+    if (loading) {
+      btn.innerHTML = `<div class="btn-spinner"></div> <span>Processing...</span>`;
+    } else {
+      btn.innerHTML = `<span>${defaultText}</span>`;
+    }
+  }
+
+  // Check URL query parameters (e.g. ?expired=1)
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('expired') === '1') {
+    showError('Your session has expired. Please sign in again.');
+  }
+
+  // Handle Login
+  if (loginForm) {
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      clearError();
+
+      const submitBtn = document.getElementById('login-submit-btn');
+      const login = loginForm.login.value.trim();
+      const password = loginForm.password.value;
+
+      if (!login || !password) {
+        showError('Please enter both your login and password.');
+        return;
+      }
+
+      setButtonLoading(submitBtn, true, 'Sign In');
+
+      try {
+        await api.post('/api/auth/login', { login, password });
+        window.location.href = '/app';
+      } catch (err) {
+        setButtonLoading(submitBtn, false, 'Sign In');
+        showError(err.message || 'Invalid credentials. Please try again.');
+      }
+    });
+  }
+
+  // Handle Register
   if (registerForm) {
-    initRegisterForm(registerForm);
+    registerForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      clearError();
+
+      const submitBtn = document.getElementById('register-submit-btn');
+      const username = registerForm.username.value.trim();
+      const email = registerForm.email.value.trim();
+      const password = registerForm.password.value;
+
+      if (!username || !email || !password) {
+        showError('All fields are required.');
+        return;
+      }
+
+      setButtonLoading(submitBtn, true, 'Create Account');
+
+      try {
+        await api.post('/api/auth/register', { username, email, password });
+        window.location.href = '/app';
+      } catch (err) {
+        setButtonLoading(submitBtn, false, 'Create Account');
+        showError(err.message || 'Registration failed. Please check your details.');
+      }
+    });
   }
 });
-
-function showErrorBanner(message) {
-  const banner = document.getElementById('auth-banner');
-  if (banner) {
-    banner.className = 'auth-banner error';
-    banner.textContent = message;
-    banner.style.display = 'block';
-  }
-}
-
-function clearErrorBanner() {
-  const banner = document.getElementById('auth-banner');
-  if (banner) {
-    banner.style.display = 'none';
-    banner.textContent = '';
-  }
-}
-
-function initLoginForm(form) {
-  const submitBtn = form.querySelector('button[type="submit"]');
-
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    clearErrorBanner();
-
-    const loginInput = form.querySelector('#login');
-    const passwordInput = form.querySelector('#password');
-
-    const login = loginInput.value.trim();
-    const password = passwordInput.value;
-
-    if (!login) {
-      showErrorBanner('Please enter your email or username.');
-      loginInput.focus();
-      return;
-    }
-
-    if (!password) {
-      showErrorBanner('Please enter your password.');
-      passwordInput.focus();
-      return;
-    }
-
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Logging in...';
-
-    try {
-      await api.post('/api/auth/login', { login, password });
-      window.location.href = '/app';
-    } catch (err) {
-      showErrorBanner(err.message || 'Incorrect email or password.');
-      submitBtn.disabled = false;
-      submitBtn.textContent = 'Login';
-    }
-  });
-}
-
-function initRegisterForm(form) {
-  const submitBtn = form.querySelector('button[type="submit"]');
-  const usernameInput = form.querySelector('#username');
-  const emailInput = form.querySelector('#email');
-  const passwordInput = form.querySelector('#password');
-  const confirmPasswordInput = form.querySelector('#confirm_password');
-
-  // Password requirements items
-  const reqLength = document.getElementById('req-length');
-  const reqLetter = document.getElementById('req-letter');
-  const reqNumber = document.getElementById('req-number');
-  const reqMatch = document.getElementById('req-match');
-
-  function validateLivePassword() {
-    const pwd = passwordInput.value;
-    const confirm = confirmPasswordInput ? confirmPasswordInput.value : '';
-
-    const hasLength = pwd.length >= 8;
-    const hasLetter = /[a-zA-Z]/.test(pwd);
-    const hasNumberOrSpec = /[\d!@#$%^&*()_+\-=\[\]{}|;:,.<>?]/.test(pwd);
-    const hasMatch = pwd.length > 0 && pwd === confirm;
-
-    if (reqLength) reqLength.classList.toggle('met', hasLength);
-    if (reqLetter) reqLetter.classList.toggle('met', hasLetter);
-    if (reqNumber) reqNumber.classList.toggle('met', hasNumberOrSpec);
-    if (reqMatch) reqMatch.classList.toggle('met', hasMatch);
-
-    return hasLength && hasLetter && hasNumberOrSpec && (!confirmPasswordInput || hasMatch);
-  }
-
-  passwordInput.addEventListener('input', validateLivePassword);
-  if (confirmPasswordInput) {
-    confirmPasswordInput.addEventListener('input', validateLivePassword);
-  }
-
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    clearErrorBanner();
-
-    const username = usernameInput.value.trim();
-    const email = emailInput.value.trim();
-    const password = passwordInput.value;
-    const confirmPassword = confirmPasswordInput ? confirmPasswordInput.value : '';
-
-    if (!username || username.length < 3) {
-      showErrorBanner('Username must be at least 3 characters.');
-      usernameInput.focus();
-      return;
-    }
-
-    if (!email || !email.includes('@')) {
-      showErrorBanner('Please enter a valid email address.');
-      emailInput.focus();
-      return;
-    }
-
-    if (!validateLivePassword()) {
-      showErrorBanner('Please ensure your password meets all requirements.');
-      passwordInput.focus();
-      return;
-    }
-
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Creating account...';
-
-    try {
-      await api.post('/api/auth/register', { username, email, password });
-      window.location.href = '/app';
-    } catch (err) {
-      showErrorBanner(err.message || 'Failed to create account.');
-      submitBtn.disabled = false;
-      submitBtn.textContent = 'Create account';
-    }
-  });
-}

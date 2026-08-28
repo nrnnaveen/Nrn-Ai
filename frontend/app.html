@@ -31,17 +31,20 @@
       </div>
 
       <div class="sidebar-actions">
-        <button class="btn new-chat-btn" id="new-chat-btn">
+        <button class="new-chat-btn" id="new-chat-btn" title="New chat (Cmd/Ctrl + Shift + O)">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
           <span>New chat</span>
         </button>
 
         <div class="search-box">
+          <span class="search-icon-hint">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          </span>
           <input
             type="text"
             id="search-input"
             class="search-input"
-            placeholder="Search conversations..."
+            placeholder="Search chats (⌘K)..."
             aria-label="Search conversations"
           >
           <button id="search-clear-btn" class="search-clear-btn" aria-label="Clear search">✕</button>
@@ -70,6 +73,10 @@
         </button>
 
         <div class="user-menu-popover" id="user-menu-popover" role="menu">
+          <button class="user-menu-item" id="menu-settings-btn" role="menuitem">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+            <span>Settings (⌘,)</span>
+          </button>
           <button class="user-menu-item" id="menu-feedback-btn" role="menuitem">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
             <span>Feedback</span>
@@ -95,6 +102,9 @@
         </div>
 
         <div class="header-right">
+          <button class="btn-icon" id="header-settings-btn" title="Settings (⌘,)">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
           <button class="btn btn-secondary btn-sm" id="header-feedback-btn">Feedback</button>
         </div>
       </header>
@@ -128,10 +138,10 @@
                 </button>
                 <input type="file" id="file-input" class="file-upload-input" multiple>
 
-                <!-- Claude / ChatGPT Style Custom Model Picker in Chat Box -->
+                <!-- Claude / ChatGPT Style In-Composer Model Picker -->
                 <div class="model-picker-wrapper" id="model-picker-wrapper">
                   <button type="button" class="model-picker-btn" id="model-picker-btn" aria-haspopup="true" aria-expanded="false" title="Switch AI model">
-                    <span class="model-picker-label" id="model-picker-label">Llama 3.3 70B</span>
+                    <span class="model-picker-label" id="model-picker-label">Nemotron 3 Super</span>
                     <svg class="model-picker-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
                   </button>
                   <div class="model-picker-dropdown" id="model-picker-dropdown" role="menu"></div>
@@ -155,15 +165,19 @@
 
   <script type="module">
     import { api } from '/js/api.js';
+    import { initThemeSystem } from '/js/theme.js';
+    import { initSettingsModal } from '/js/settings.js';
     import { initSidebar } from '/js/sidebar.js';
     import { initChat } from '/js/chat.js';
     import { initModelPicker } from '/js/model_picker.js';
     import { initUploadHandler } from '/js/upload.js';
     import { initFeedbackModal } from '/js/feedback.js';
-    import { showToast } from '/js/ui.js';
 
     document.addEventListener('DOMContentLoaded', async () => {
-      // 1. Verify user session
+      // 1. Initialize Theme System
+      initThemeSystem();
+
+      // 2. Verify user session
       try {
         await api.get('/api/users/me');
       } catch {
@@ -171,7 +185,7 @@
         return;
       }
 
-      // 2. Elements references
+      // 3. Element references
       const sidebarContainer = document.getElementById('sidebar-convo-container');
       const newChatBtn = document.getElementById('new-chat-btn');
       const searchInput = document.getElementById('search-input');
@@ -193,7 +207,11 @@
       const attachBtn = document.getElementById('attach-btn');
       const fileInput = document.getElementById('file-input');
 
-      // 3. Initialize Model Picker
+      // 4. Initialize Settings Modal
+      initSettingsModal(document.getElementById('header-settings-btn'));
+      initSettingsModal(document.getElementById('menu-settings-btn'));
+
+      // 5. Initialize Model Picker
       await initModelPicker({
         wrapperEl: modelPickerWrapper,
         buttonEl: modelPickerBtn,
@@ -201,7 +219,7 @@
         dropdownEl: modelPickerDropdown,
       });
 
-      // 4. Initialize Chat logic
+      // 6. Initialize Chat Engine
       const chatEngine = initChat({
         messagesContainer,
         scrollArea,
@@ -216,7 +234,7 @@
         sidebarContainer
       });
 
-      // 5. Initialize Sidebar
+      // 7. Initialize Sidebar
       await initSidebar({
         container: sidebarContainer,
         newChatBtn,
@@ -230,7 +248,7 @@
         }
       });
 
-      // 6. Initialize Uploads
+      // 8. Initialize Uploads
       initUploadHandler({
         attachBtn,
         fileInput,
@@ -241,11 +259,11 @@
         }
       });
 
-      // 7. Initialize Feedback Modal
+      // 9. Initialize Feedback Modals
       initFeedbackModal(document.getElementById('header-feedback-btn'));
       initFeedbackModal(document.getElementById('menu-feedback-btn'));
 
-      // 8. User menu popover
+      // 10. User Menu Popover
       const profileBtn = document.getElementById('user-profile-btn');
       const menuPopover = document.getElementById('user-menu-popover');
       profileBtn.addEventListener('click', (e) => {
@@ -266,7 +284,7 @@
         }
       });
 
-      // 9. Mobile drawer triggers
+      // 11. Mobile Drawer
       const openDrawerBtn = document.getElementById('open-sidebar-btn');
       const closeDrawerBtn = document.getElementById('close-sidebar-btn');
       const sidebarEl = document.getElementById('app-sidebar');

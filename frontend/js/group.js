@@ -2,6 +2,7 @@ import { api } from './api.js';
 import { WSManager } from './ws.js';
 import { renderMarkdown } from './markdown.js';
 import { showToast, icons, formatTime, escapeHtml } from './ui.js';
+import { initThemeSystem } from './theme.js';
 
 let currentUser = null;
 let currentRoomId = 'general';
@@ -9,6 +10,7 @@ let wsClient = null;
 let groupMessages = [];
 
 document.addEventListener('DOMContentLoaded', async () => {
+  initThemeSystem();
   try {
     currentUser = await api.get('/api/users/me');
     initGroupRoom();

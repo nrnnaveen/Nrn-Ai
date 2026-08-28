@@ -1,13 +1,19 @@
+// ==========================================================================
+// NRN AI — CHAT CONTROLLER & GPT-STYLE ACTIONS
+// Linear / Claude / Notion / Apple Restrained Design Language
+// ==========================================================================
+
 import { api } from './api.js';
 import { renderMarkdown } from './markdown.js';
 import { consumeSSEStream, cancelStreaming, isStreaming } from './streaming.js';
 import { getSelectedModel, setSelectedModel } from './model_picker.js';
 import { getPendingAttachmentIds, clearPendingAttachments } from './upload.js';
 import { showToast, icons, formatTime, escapeHtml } from './ui.js';
-import { setActiveConversationId, reloadConversations, getActiveConversationId } from './sidebar.js';
+import { setActiveConversationId, reloadConversations } from './sidebar.js';
 
 let messages = [];
 let currentConversation = null;
+let messageFeedbackState = {}; // { [msgId]: 'like' | 'dislike' }
 
 export function initChat({
   messagesContainer,
@@ -28,11 +34,19 @@ export function initChat({
     composerTextarea.style.height = Math.min(composerTextarea.scrollHeight, 180) + 'px';
   });
 
-  // Enter to send, Shift+Enter for newline
+  // Enter to send (respecting setting)
   composerTextarea.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
+    const enterToSend = localStorage.getItem('nrn_enter_to_send') !== 'false';
+    if (enterToSend) {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        handleSendMessage();
+      }
+    } else {
+      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        handleSendMessage();
+      }
     }
   });
 
@@ -45,6 +59,7 @@ export function initChat({
     stopBtn.addEventListener('click', () => {
       cancelStreaming();
       setStreamingState(false);
+      showToast('Generation stopped.');
     });
   }
 
@@ -71,8 +86,8 @@ export function initChat({
     if (stopBtn) stopBtn.style.display = streaming ? 'flex' : 'none';
   }
 
-  async function handleSendMessage() {
-    const text = composerTextarea.value.trim();
+  async function handleSendMessage(customText = null) {
+    const text = (customText !== null ? customText : composerTextarea.value).trim();
     const attachmentIds = getPendingAttachmentIds();
 
     if (!text && !attachmentIds.length) return;
@@ -138,7 +153,7 @@ export function initChat({
       onChunk: (accumulated) => {
         tempAssistantMsg.content = accumulated;
         updateAssistantBubble(tempAssistantMsg.id, accumulated, true);
-        scrollToBottom();
+        conditionalScrollToBottom();
       },
       onComplete: (fullText, finalData) => {
         tempAssistantMsg.content = fullText;
@@ -168,12 +183,7 @@ export function initChat({
     messagesContainer.innerHTML = '';
 
     if (!messages.length) {
-      messagesContainer.innerHTML = `
-        <div class="chat-empty-state">
-          <h2 class="empty-title">Start a new conversation</h2>
-          <p class="empty-subtitle">Ask questions, solve problems, analyze data, or draft code with NRN AI.</p>
-        </div>
-      `;
+      renderEmptyState();
       return;
     }
 
@@ -181,6 +191,48 @@ export function initChat({
       const isLastAi = msg.role === 'assistant' && idx === messages.length - 1;
       const el = createMessageElement(msg, isLastAi);
       messagesContainer.appendChild(el);
+    });
+  }
+
+  function renderEmptyState() {
+    messagesContainer.innerHTML = `
+      <div class="chat-empty-state">
+        <h1 class="empty-title">How can I help you today?</h1>
+        <p class="empty-subtitle">Select a suggested prompt below or type your message to get started.</p>
+        
+        <div class="empty-suggestions-grid">
+          <div class="suggestion-card" data-prompt="Help me brainstorm innovative product features for a modern web app">
+            <div class="suggestion-card-title">💡 Brainstorm ideas</div>
+            <div class="suggestion-card-desc">Generate creative feature ideas and architectural concepts</div>
+          </div>
+          
+          <div class="suggestion-card" data-prompt="Write a Python script to parse and analyze structured JSON data efficiently">
+            <div class="suggestion-card-title">⚡ Code & debug</div>
+            <div class="suggestion-card-desc">Write, optimize, or review clean code and scripts</div>
+          </div>
+
+          <div class="suggestion-card" data-prompt="Summarize the core architectural benefits of Server-Sent Events vs WebSockets">
+            <div class="suggestion-card-title">📝 Summarize concepts</div>
+            <div class="suggestion-card-desc">Condense complex technical topics into clear takeaways</div>
+          </div>
+
+          <div class="suggestion-card" data-prompt="Explain how modern neural network reasoning and attention mechanisms work">
+            <div class="suggestion-card-title">🔍 Explain technology</div>
+            <div class="suggestion-card-desc">Break down challenging technical mechanisms simply</div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    // Bind suggestion clicks
+    messagesContainer.querySelectorAll('.suggestion-card').forEach((card) => {
+      card.addEventListener('click', () => {
+        const promptText = card.getAttribute('data-prompt');
+        composerTextarea.value = promptText;
+        composerTextarea.focus();
+        composerTextarea.style.height = 'auto';
+        composerTextarea.style.height = Math.min(composerTextarea.scrollHeight, 180) + 'px';
+      });
     });
   }
 
@@ -208,21 +260,34 @@ export function initChat({
 
     const timeStr = formatTime(msg.created_at);
     const senderName = msg.role === 'user' ? 'You' : 'NRN AI';
+    const avatarLetter = msg.role === 'user' ? 'U' : 'N';
 
     if (msg.role === 'user') {
       wrapper.innerHTML = `
         <div class="message-header">
-          <span class="message-sender">${senderName}</span>
+          <span class="message-sender">
+            <span class="message-avatar-badge">${avatarLetter}</span>
+            <span>${senderName}</span>
+          </span>
           <span>${timeStr}</span>
         </div>
         ${attachmentsHtml}
         <div class="message-bubble">${escapeHtml(msg.content)}</div>
         <div class="message-actions-bar">
-          <button class="action-btn-pill edit-msg-btn" data-id="${msg.id}">
+          <button class="action-btn-pill copy-user-btn" title="Copy text">
+            ${icons.copy} <span>Copy</span>
+          </button>
+          <button class="action-btn-pill edit-msg-btn" data-id="${msg.id}" title="Edit prompt">
             ${icons.edit} <span>Edit</span>
           </button>
         </div>
       `;
+
+      // Copy user prompt
+      wrapper.querySelector('.copy-user-btn').addEventListener('click', () => {
+        navigator.clipboard.writeText(msg.content);
+        showToast('Prompt copied to clipboard.', 'success');
+      });
 
       // Edit message handler
       const editBtn = wrapper.querySelector('.edit-msg-btn');
@@ -235,22 +300,83 @@ export function initChat({
       // Assistant message
       const renderedBody = renderMarkdown(msg.content);
       const cursorHtml = msg.isStreaming ? '<span class="streaming-cursor"></span>' : '';
+      const feedback = messageFeedbackState[msg.id] || null;
 
       wrapper.innerHTML = `
         <div class="message-header">
-          <span class="message-sender">${senderName}</span>
+          <span class="message-sender">
+            <span class="message-avatar-badge" style="color:var(--color-accent);">AI</span>
+            <span>${senderName}</span>
+          </span>
           <span>${timeStr}</span>
         </div>
         <div class="message-bubble markdown-body">${renderedBody}${cursorHtml}</div>
         <div class="message-actions-bar">
+          <button class="action-btn-pill copy-ai-btn" title="Copy response">
+            ${icons.copy} <span>Copy</span>
+          </button>
+          <button class="action-btn-pill like-btn ${feedback === 'like' ? 'active' : ''}" title="Good response">
+            ${icons.thumbsUp}
+          </button>
+          <button class="action-btn-pill dislike-btn ${feedback === 'dislike' ? 'active' : ''}" title="Bad response">
+            ${icons.thumbsDown}
+          </button>
+          <button class="action-btn-pill share-btn" title="Share response">
+            ${icons.share} <span>Share</span>
+          </button>
           ${isLastAi && !msg.isStreaming ? `
-            <button class="action-btn-pill regenerate-btn" data-id="${msg.id}">
+            <button class="action-btn-pill regenerate-btn" data-id="${msg.id}" title="Regenerate answer">
               ${icons.refresh} <span>Regenerate</span>
             </button>
           ` : ''}
         </div>
       `;
 
+      // Copy assistant response
+      const copyBtn = wrapper.querySelector('.copy-ai-btn');
+      copyBtn.addEventListener('click', () => {
+        navigator.clipboard.writeText(msg.content);
+        copyBtn.classList.add('copied');
+        copyBtn.innerHTML = `${icons.check} <span>Copied!</span>`;
+        showToast('Response copied to clipboard.', 'success');
+        setTimeout(() => {
+          copyBtn.classList.remove('copied');
+          copyBtn.innerHTML = `${icons.copy} <span>Copy</span>`;
+        }, 2000);
+      });
+
+      // Like feedback
+      const likeBtn = wrapper.querySelector('.like-btn');
+      likeBtn.addEventListener('click', () => {
+        const isLiked = messageFeedbackState[msg.id] === 'like';
+        messageFeedbackState[msg.id] = isLiked ? null : 'like';
+        likeBtn.classList.toggle('active', !isLiked);
+        wrapper.querySelector('.dislike-btn').classList.remove('active');
+        if (!isLiked) showToast('Thanks for your feedback!', 'success');
+      });
+
+      // Dislike feedback
+      const dislikeBtn = wrapper.querySelector('.dislike-btn');
+      dislikeBtn.addEventListener('click', () => {
+        const isDisliked = messageFeedbackState[msg.id] === 'dislike';
+        messageFeedbackState[msg.id] = isDisliked ? null : 'dislike';
+        dislikeBtn.classList.toggle('active', !isDisliked);
+        wrapper.querySelector('.like-btn').classList.remove('active');
+        if (!isDisliked) showToast('Feedback recorded.', 'info');
+      });
+
+      // Share button
+      const shareBtn = wrapper.querySelector('.share-btn');
+      shareBtn.addEventListener('click', () => {
+        if (navigator.share) {
+          navigator.share({ title: 'NRN AI Response', text: msg.content }).catch(() => {});
+        } else {
+          navigator.clipboard.writeText(msg.content);
+          showToast('Response copied for sharing.', 'success');
+        }
+      });
+
+      // Regenerate button
       const regenBtn = wrapper.querySelector('.regenerate-btn');
       if (regenBtn) {
         regenBtn.addEventListener('click', () => {
@@ -328,7 +454,6 @@ export function initChat({
       method: 'PATCH',
       body: { content: newText, model: selectedModel },
       onStart: async () => {
-        // Reload messages up to this point
         await loadConversationMessages(currentConversation);
       },
       onChunk: (accumulated) => {
@@ -383,6 +508,13 @@ export function initChat({
 
   function scrollToBottom() {
     if (scrollArea) {
+      scrollArea.scrollTop = scrollArea.scrollHeight;
+    }
+  }
+
+  function conditionalScrollToBottom() {
+    const autoScroll = localStorage.getItem('nrn_auto_scroll') !== 'false';
+    if (autoScroll && scrollArea) {
       scrollArea.scrollTop = scrollArea.scrollHeight;
     }
   }

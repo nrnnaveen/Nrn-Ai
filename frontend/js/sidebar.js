@@ -1,5 +1,10 @@
+// ==========================================================================
+// NRN AI — SIDEBAR CONTROLLER & DATE GROUPING
+// Linear / Claude / Notion / Apple Restrained Design Language
+// ==========================================================================
+
 import { api } from './api.js';
-import { icons, showToast, showConfirmModal, escapeHtml, formatDateGroup } from './ui.js';
+import { showConfirmModal, showToast, icons, formatDateGroup, escapeHtml } from './ui.js';
 
 let conversations = [];
 let activeConversationId = null;
@@ -12,19 +17,21 @@ export async function initSidebar({
   searchInput,
   searchClearBtn,
   onSelectConversation,
-  onNewChat,
+  onNewChat
 }) {
   onSelectConversationCallback = onSelectConversation;
   onNewChatCallback = onNewChat;
 
-  if (newChatBtn) {
-    newChatBtn.addEventListener('click', () => {
-      setActiveConversationId(null);
-      if (onNewChatCallback) onNewChatCallback();
-      closeMobileSidebar();
-    });
-  }
+  // New Chat action
+  newChatBtn.addEventListener('click', () => {
+    setActiveConversationId(null);
+    if (onNewChatCallback) {
+      onNewChatCallback();
+    }
+    closeMobileSidebar();
+  });
 
+  // Search input
   if (searchInput) {
     searchInput.addEventListener('input', (e) => {
       const q = e.target.value.trim().toLowerCase();
@@ -33,23 +40,38 @@ export async function initSidebar({
       }
       filterConversations(q, container);
     });
-  }
 
-  if (searchClearBtn) {
-    searchClearBtn.addEventListener('click', () => {
-      if (searchInput) {
+    if (searchClearBtn) {
+      searchClearBtn.addEventListener('click', () => {
         searchInput.value = '';
         searchClearBtn.classList.remove('visible');
         renderConversations(conversations, container);
-      }
-    });
+        searchInput.focus();
+      });
+    }
   }
 
-  // Load current user for footer
-  loadUserProfile();
+  // Global keyboard shortcuts
+  document.addEventListener('keydown', (e) => {
+    // Cmd/Ctrl + K -> Focus search
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+      e.preventDefault();
+      if (searchInput) {
+        searchInput.focus();
+        searchInput.select();
+      }
+    }
 
-  // Load conversation list
+    // Cmd/Ctrl + Shift + O -> New Chat
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'O' || e.key === 'o')) {
+      e.preventDefault();
+      newChatBtn.click();
+    }
+  });
+
+  // Load past conversations from API
   await reloadConversations(container);
+  await loadUserProfile();
 }
 
 export async function reloadConversations(container) {
@@ -65,7 +87,8 @@ export function setActiveConversationId(id) {
   activeConversationId = id;
   const items = document.querySelectorAll('.convo-item');
   items.forEach((item) => {
-    item.classList.toggle('active', item.getAttribute('data-id') === id);
+    const itemId = item.getAttribute('data-id');
+    item.classList.toggle('active', itemId === id);
   });
 }
 
@@ -88,9 +111,10 @@ function renderConversations(list, container, searchFilter = '') {
 
   if (!list.length) {
     const emptyNotice = document.createElement('div');
-    emptyNotice.style.padding = '12px 8px';
+    emptyNotice.style.padding = '16px 8px';
     emptyNotice.style.fontSize = 'var(--fs-xs)';
     emptyNotice.style.color = 'var(--color-text-faint)';
+    emptyNotice.style.textAlign = 'center';
     emptyNotice.textContent = searchFilter ? 'No matching conversations.' : 'No conversations yet.';
     container.appendChild(emptyNotice);
     return;
@@ -219,7 +243,7 @@ async function loadUserProfile() {
       nameEl.textContent = user.username;
     }
   } catch (err) {
-    console.error('Failed to load user profile:', err);
+    console.debug('Failed to load user profile in sidebar:', err);
   }
 }
 

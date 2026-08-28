@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Register — NRN AI</title>
+  <title>Create Account — NRN AI</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="stylesheet" href="/css/tokens.css">
   <link rel="stylesheet" href="/css/reset.css">
@@ -11,17 +11,15 @@
   <link rel="stylesheet" href="/css/auth.css">
 </head>
 <body>
-  <div class="auth-wrapper">
+  <div class="auth-container">
     <div class="auth-card">
-      <div class="auth-brand">
-        <img src="/favicon.svg" alt="NRN AI Monogram" class="auth-brand-logo">
-        <span class="auth-brand-name">NRN AI</span>
+      <div class="auth-header">
+        <img src="/favicon.svg" alt="NRN AI Logo" class="auth-logo">
+        <h1 class="auth-title">Create your account</h1>
+        <p class="auth-subtitle">Get your own private assistant workspace</p>
       </div>
 
-      <h1 class="auth-title">Create an account</h1>
-      <p class="auth-subtitle">Get started with your private AI workspace</p>
-
-      <div id="auth-banner" class="auth-banner" role="alert"></div>
+      <div id="auth-banner" class="auth-error-banner" role="alert"></div>
 
       <form id="register-form" class="auth-form" novalidate>
         <div class="form-group">
@@ -33,12 +31,13 @@
             class="form-input"
             autocomplete="username"
             required
+            autofocus
             placeholder="e.g. alex"
           >
         </div>
 
         <div class="form-group">
-          <label for="email" class="form-label">Email address</label>
+          <label for="email" class="form-label">Email</label>
           <input
             type="email"
             id="email"
@@ -52,53 +51,32 @@
 
         <div class="form-group">
           <label for="password" class="form-label">Password</label>
-          <input
-            type="password"
-            id="password"
-            name="password"
-            class="form-input"
-            autocomplete="new-password"
-            required
-            placeholder="At least 8 characters"
-          >
-          <ul class="password-requirements" aria-live="polite">
-            <li id="req-length" class="requirement-item">
-              <span class="requirement-dot"></span> At least 8 characters
-            </li>
-            <li id="req-letter" class="requirement-item">
-              <span class="requirement-dot"></span> Contains a letter
-            </li>
-            <li id="req-number" class="requirement-item">
-              <span class="requirement-dot"></span> Contains a number or symbol
-            </li>
-          </ul>
+          <div class="password-input-wrapper">
+            <input
+              type="password"
+              id="password"
+              name="password"
+              class="form-input"
+              autocomplete="new-password"
+              required
+              placeholder="8+ chars, upper, lower, number, symbol"
+            >
+            <button type="button" class="password-toggle-btn" id="toggle-password-btn" aria-label="Toggle password visibility">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+          <div class="password-strength-bar">
+            <div class="password-strength-fill" id="strength-fill"></div>
+          </div>
         </div>
 
-        <div class="form-group">
-          <label for="confirm_password" class="form-label">Confirm password</label>
-          <input
-            type="password"
-            id="confirm_password"
-            name="confirm_password"
-            class="form-input"
-            autocomplete="new-password"
-            required
-            placeholder="••••••••"
-          >
-          <ul class="password-requirements">
-            <li id="req-match" class="requirement-item">
-              <span class="requirement-dot"></span> Passwords match
-            </li>
-          </ul>
-        </div>
-
-        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: var(--sp-2);">
-          Create account
+        <button type="submit" class="btn btn-primary" id="register-submit-btn" style="width: 100%; margin-top: var(--sp-2);">
+          <span>Create Account</span>
         </button>
       </form>
 
-      <div class="auth-footer">
-        Already have an account? <a href="/login">Log in</a>
+      <div class="auth-footer-links">
+        Already have an account? <a href="/login" class="auth-link">Sign in</a>
       </div>
     </div>
   </div>
