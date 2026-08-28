@@ -1,0 +1,23 @@
+[
+  {
+    "id": "d5643a6b-85c4-48fc-8a5d-cdec3954b3e8",
+    "username": "Navee",
+    "email": "ffnrnindian@gmail.com",
+    "hashed_password": "$2b$12$l5P1vH1PyWngt8J774AW8egGoCaG2Gzi6.CkVNYx.icTrbAatEcEi",
+    "created_at": "2026-08-27T12:40:36.468362+00:00"
+  },
+  {
+    "id": "d483ae7a-19dc-4c0e-9c87-6e8130251958",
+    "username": "live_tester",
+    "email": "live@test.com",
+    "hashed_password": "$2b$12$ajRKUJUeP0eArUoLabaT3.cGs19mnme6I9YOwmiTUkNQrkta/X78K",
+    "created_at": "2026-08-27T16:29:45.299567+00:00"
+  },
+  {
+    "id": "849d4a8e-ac40-4dff-97eb-662b1478949e",
+    "username": "Naveen",
+    "email": "nrnnaveen04@gmail.com",
+    "hashed_password": "$2b$12$BtrK/8DJlBSupoejx4ALl.1Srv0D96J21kH/jUTMR7GENfBXJRPBu",
+    "created_at": "2026-08-28T03:58:19.908979+00:00"
+  }
+]

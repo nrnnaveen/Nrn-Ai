@@ -1,0 +1,32 @@
+{
+  "rooms": [
+    {
+      "id": "general",
+      "name": "General AI Group",
+      "description": "Shared collaborative room for all members and NRN AI.",
+      "created_at": "2026-08-27T12:36:12.632898+00:00"
+    }
+  ],
+  "messages": {
+    "general": [
+      {
+        "id": "57d1ea0b-55b7-43be-b417-07d6b2b3189c",
+        "room_id": "general",
+        "sender_type": "user",
+        "sender_id": "d5643a6b-85c4-48fc-8a5d-cdec3954b3e8",
+        "sender_name": "Navee",
+        "content": "hii",
+        "created_at": "2026-08-27T12:46:56.306104+00:00"
+      },
+      {
+        "id": "de0af4e9-ec6b-4b0e-95a6-19a348995f54",
+        "room_id": "general",
+        "sender_type": "ai",
+        "sender_id": null,
+        "sender_name": "NRN AI",
+        "content": "NRN AI couldn't respond right now — please ensure `OPENROUTER_API_KEY` is configured in `.env`.",
+        "created_at": "2026-08-27T12:46:56.311199+00:00"
+      }
+    ]
+  }
+}

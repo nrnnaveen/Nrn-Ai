@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NRN AI</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="stylesheet" href="/css/tokens.css">
+  <link rel="stylesheet" href="/css/reset.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/layout.css">
+  <link rel="stylesheet" href="/css/sidebar.css">
+  <link rel="stylesheet" href="/css/chat.css">
+  <link rel="stylesheet" href="/css/markdown.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Mobile Sidebar Backdrop -->
+    <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+
+    <!-- Sidebar Shell -->
+    <aside class="app-sidebar" id="app-sidebar" aria-label="Chat navigation">
+      <div class="sidebar-header">
+        <a href="/app" class="brand-link">
+          <img src="/favicon.svg" alt="NRN AI Logo" class="brand-icon">
+          <span>NRN AI</span>
+        </a>
+        <button class="btn-icon mobile-menu-btn" id="close-sidebar-btn" aria-label="Close sidebar" style="display:none;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+      </div>
+
+      <div class="sidebar-actions">
+        <button class="btn new-chat-btn" id="new-chat-btn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+          <span>New chat</span>
+        </button>
+
+        <div class="search-box">
+          <input
+            type="text"
+            id="search-input"
+            class="search-input"
+            placeholder="Search conversations..."
+            aria-label="Search conversations"
+          >
+          <button id="search-clear-btn" class="search-clear-btn" aria-label="Clear search">✕</button>
+        </div>
+      </div>
+
+      <!-- Conversations grouped by recency -->
+      <nav class="sidebar-content" id="sidebar-convo-container" aria-label="Past conversations"></nav>
+
+      <!-- Group Mode Separate Link Section -->
+      <div class="sidebar-group-section">
+        <a href="/group" class="group-room-link">
+          <span>Group Rooms</span>
+          <span class="badge">General</span>
+        </a>
+      </div>
+
+      <!-- User Profile & Menu Footer -->
+      <div class="sidebar-footer">
+        <button class="user-profile-btn" id="user-profile-btn" aria-haspopup="true" aria-expanded="false">
+          <div class="user-info">
+            <div class="user-avatar" id="user-avatar">U</div>
+            <span class="user-name" id="user-name">User</span>
+          </div>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+
+        <div class="user-menu-popover" id="user-menu-popover" role="menu">
+          <button class="user-menu-item" id="menu-feedback-btn" role="menuitem">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <span>Feedback</span>
+          </button>
+          <button class="user-menu-item danger" id="menu-logout-btn" role="menuitem">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+            <span>Logout</span>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Workspace Pane -->
+    <main class="app-main">
+      <header class="app-header">
+        <div class="header-left">
+          <button class="btn-icon mobile-menu-btn" id="open-sidebar-btn" aria-label="Open sidebar">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+          </button>
+          <span class="modal-title" id="chat-title" style="cursor:pointer;max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="Click to rename">
+            New Conversation
+          </span>
+        </div>
+
+        <div class="header-right">
+          <button class="btn btn-secondary btn-sm" id="header-feedback-btn">Feedback</button>
+        </div>
+      </header>
+
+      <!-- Chat Viewport -->
+      <div class="chat-viewport">
+        <div class="chat-scroll-area" id="chat-scroll-area">
+          <div class="chat-messages-container" id="messages-container" aria-live="polite"></div>
+        </div>
+
+        <!-- Composer Form -->
+        <div class="chat-composer-container">
+          <form id="composer-form" class="composer-card">
+            <div id="composer-preview-area" class="composer-preview-area"></div>
+            
+            <div class="composer-input-row">
+              <textarea
+                id="composer-textarea"
+                class="composer-textarea"
+                placeholder="Message NRN AI..."
+                rows="1"
+                aria-label="Message prompt"
+              ></textarea>
+            </div>
+
+            <div class="composer-tools-row">
+              <div class="composer-left-tools">
+                <!-- Attach file button -->
+                <button type="button" class="btn-icon" id="attach-btn" title="Attach file or image" aria-label="Attach file">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+                </button>
+                <input type="file" id="file-input" class="file-upload-input" multiple>
+
+                <!-- Claude / ChatGPT Style Custom Model Picker in Chat Box -->
+                <div class="model-picker-wrapper" id="model-picker-wrapper">
+                  <button type="button" class="model-picker-btn" id="model-picker-btn" aria-haspopup="true" aria-expanded="false" title="Switch AI model">
+                    <span class="model-picker-label" id="model-picker-label">Llama 3.3 70B</span>
+                    <svg class="model-picker-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+                  </button>
+                  <div class="model-picker-dropdown" id="model-picker-dropdown" role="menu"></div>
+                </div>
+              </div>
+
+              <div class="composer-right-tools">
+                <button type="submit" class="composer-send-btn" id="send-btn" title="Send message" aria-label="Send">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+                </button>
+                <button type="button" class="composer-stop-btn" id="stop-btn" style="display:none;" title="Stop generating" aria-label="Stop">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script type="module">
+    import { api } from '/js/api.js';
+    import { initSidebar } from '/js/sidebar.js';
+    import { initChat } from '/js/chat.js';
+    import { initModelPicker } from '/js/model_picker.js';
+    import { initUploadHandler } from '/js/upload.js';
+    import { initFeedbackModal } from '/js/feedback.js';
+    import { showToast } from '/js/ui.js';
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      // 1. Verify user session
+      try {
+        await api.get('/api/users/me');
+      } catch {
+        window.location.href = '/login';
+        return;
+      }
+
+      // 2. Elements references
+      const sidebarContainer = document.getElementById('sidebar-convo-container');
+      const newChatBtn = document.getElementById('new-chat-btn');
+      const searchInput = document.getElementById('search-input');
+      const searchClearBtn = document.getElementById('search-clear-btn');
+      const messagesContainer = document.getElementById('messages-container');
+      const scrollArea = document.getElementById('chat-scroll-area');
+      const composerForm = document.getElementById('composer-form');
+      const composerTextarea = document.getElementById('composer-textarea');
+      const sendBtn = document.getElementById('send-btn');
+      const stopBtn = document.getElementById('stop-btn');
+      const chatTitleEl = document.getElementById('chat-title');
+      
+      const modelPickerWrapper = document.getElementById('model-picker-wrapper');
+      const modelPickerBtn = document.getElementById('model-picker-btn');
+      const modelPickerLabel = document.getElementById('model-picker-label');
+      const modelPickerDropdown = document.getElementById('model-picker-dropdown');
+      
+      const previewContainer = document.getElementById('composer-preview-area');
+      const attachBtn = document.getElementById('attach-btn');
+      const fileInput = document.getElementById('file-input');
+
+      // 3. Initialize Model Picker
+      await initModelPicker({
+        wrapperEl: modelPickerWrapper,
+        buttonEl: modelPickerBtn,
+        labelEl: modelPickerLabel,
+        dropdownEl: modelPickerDropdown,
+      });
+
+      // 4. Initialize Chat logic
+      const chatEngine = initChat({
+        messagesContainer,
+        scrollArea,
+        composerForm,
+        composerTextarea,
+        sendBtn,
+        stopBtn,
+        chatTitleEl,
+        modelLabelEl: modelPickerLabel,
+        modelDropdownEl: modelPickerDropdown,
+        previewContainer,
+        sidebarContainer
+      });
+
+      // 5. Initialize Sidebar
+      await initSidebar({
+        container: sidebarContainer,
+        newChatBtn,
+        searchInput,
+        searchClearBtn,
+        onSelectConversation: (conv) => {
+          chatEngine.loadConversationMessages(conv);
+        },
+        onNewChat: () => {
+          chatEngine.handleNewChat();
+        }
+      });
+
+      // 6. Initialize Uploads
+      initUploadHandler({
+        attachBtn,
+        fileInput,
+        previewContainer,
+        getActiveConversationId: () => {
+          const active = document.querySelector('.convo-item.active');
+          return active ? active.getAttribute('data-id') : null;
+        }
+      });
+
+      // 7. Initialize Feedback Modal
+      initFeedbackModal(document.getElementById('header-feedback-btn'));
+      initFeedbackModal(document.getElementById('menu-feedback-btn'));
+
+      // 8. User menu popover
+      const profileBtn = document.getElementById('user-profile-btn');
+      const menuPopover = document.getElementById('user-menu-popover');
+      profileBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        menuPopover.classList.toggle('open');
+      });
+
+      document.addEventListener('click', () => {
+        menuPopover.classList.remove('open');
+      });
+
+      document.getElementById('menu-logout-btn').addEventListener('click', async () => {
+        try {
+          await api.post('/api/auth/logout');
+          window.location.href = '/login';
+        } catch {
+          window.location.href = '/login';
+        }
+      });
+
+      // 9. Mobile drawer triggers
+      const openDrawerBtn = document.getElementById('open-sidebar-btn');
+      const closeDrawerBtn = document.getElementById('close-sidebar-btn');
+      const sidebarEl = document.getElementById('app-sidebar');
+      const backdropEl = document.getElementById('sidebar-backdrop');
+
+      openDrawerBtn.addEventListener('click', () => {
+        sidebarEl.classList.add('open');
+        backdropEl.classList.add('open');
+        closeDrawerBtn.style.display = 'flex';
+      });
+
+      const closeDrawer = () => {
+        sidebarEl.classList.remove('open');
+        backdropEl.classList.remove('open');
+      };
+
+      closeDrawerBtn.addEventListener('click', closeDrawer);
+      backdropEl.addEventListener('click', closeDrawer);
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register — NRN AI</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="stylesheet" href="/css/tokens.css">
+  <link rel="stylesheet" href="/css/reset.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/auth.css">
+</head>
+<body>
+  <div class="auth-wrapper">
+    <div class="auth-card">
+      <div class="auth-brand">
+        <img src="/favicon.svg" alt="NRN AI Monogram" class="auth-brand-logo">
+        <span class="auth-brand-name">NRN AI</span>
+      </div>
+
+      <h1 class="auth-title">Create an account</h1>
+      <p class="auth-subtitle">Get started with your private AI workspace</p>
+
+      <div id="auth-banner" class="auth-banner" role="alert"></div>
+
+      <form id="register-form" class="auth-form" novalidate>
+        <div class="form-group">
+          <label for="username" class="form-label">Username</label>
+          <input
+            type="text"
+            id="username"
+            name="username"
+            class="form-input"
+            autocomplete="username"
+            required
+            placeholder="e.g. alex"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="email" class="form-label">Email address</label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            class="form-input"
+            autocomplete="email"
+            required
+            placeholder="alex@example.com"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="password" class="form-label">Password</label>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            class="form-input"
+            autocomplete="new-password"
+            required
+            placeholder="At least 8 characters"
+          >
+          <ul class="password-requirements" aria-live="polite">
+            <li id="req-length" class="requirement-item">
+              <span class="requirement-dot"></span> At least 8 characters
+            </li>
+            <li id="req-letter" class="requirement-item">
+              <span class="requirement-dot"></span> Contains a letter
+            </li>
+            <li id="req-number" class="requirement-item">
+              <span class="requirement-dot"></span> Contains a number or symbol
+            </li>
+          </ul>
+        </div>
+
+        <div class="form-group">
+          <label for="confirm_password" class="form-label">Confirm password</label>
+          <input
+            type="password"
+            id="confirm_password"
+            name="confirm_password"
+            class="form-input"
+            autocomplete="new-password"
+            required
+            placeholder="••••••••"
+          >
+          <ul class="password-requirements">
+            <li id="req-match" class="requirement-item">
+              <span class="requirement-dot"></span> Passwords match
+            </li>
+          </ul>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: var(--sp-2);">
+          Create account
+        </button>
+      </form>
+
+      <div class="auth-footer">
+        Already have an account? <a href="/login">Log in</a>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/js/auth.js"></script>
+</body>
+</html>

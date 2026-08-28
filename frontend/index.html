@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NRN AI</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="stylesheet" href="/css/tokens.css">
+  <link rel="stylesheet" href="/css/reset.css">
+  <script type="module">
+    import { api } from '/js/api.js';
+    try {
+      await api.get('/api/users/me');
+      window.location.replace('/app');
+    } catch {
+      window.location.replace('/login');
+    }
+  </script>
+</head>
+<body style="display:flex;align-items:center;justify-content:center;height:100vh;background-color:var(--color-bg);">
+  <div style="font-size:var(--fs-sm);color:var(--color-text-muted);">Loading NRN AI...</div>
+</body>
+</html>

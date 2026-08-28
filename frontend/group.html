@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>General AI Group — NRN AI</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="stylesheet" href="/css/tokens.css">
+  <link rel="stylesheet" href="/css/reset.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/layout.css">
+  <link rel="stylesheet" href="/css/chat.css">
+  <link rel="stylesheet" href="/css/markdown.css">
+</head>
+<body>
+  <div class="app-container" style="flex-direction: column;">
+    <!-- Group Room Top Header -->
+    <header class="app-header" style="height: 54px;">
+      <div class="header-left">
+        <a href="/app" class="btn btn-secondary btn-sm" style="display:inline-flex;align-items:center;gap:4px;text-decoration:none;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
+          <span>Back to private chats</span>
+        </a>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-weight:600;font-size:var(--fs-base);">General AI Group</span>
+          <span class="badge" id="online-count-badge">1 online</span>
+        </div>
+      </div>
+
+      <div class="header-right">
+        <div style="display:flex;align-items:center;gap:6px;font-size:var(--fs-xs);color:var(--color-text-muted);">
+          <span class="status-dot connecting" id="connection-status-dot"></span>
+          <span id="connection-status-text">Connecting...</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Group Messages Viewport -->
+    <div class="chat-viewport">
+      <div class="chat-scroll-area" id="group-scroll-area">
+        <div class="chat-messages-container" id="group-messages-container" aria-live="polite"></div>
+      </div>
+
+      <!-- Group Composer -->
+      <div class="chat-composer-container">
+        <form id="group-composer-form" class="composer-card">
+          <div class="composer-input-row">
+            <textarea
+              id="group-composer-input"
+              class="composer-textarea"
+              placeholder="Message everyone in General AI Group..."
+              rows="1"
+              aria-label="Group message prompt"
+            ></textarea>
+          </div>
+          <div class="composer-tools-row" style="justify-content: flex-end;">
+            <button type="submit" class="composer-send-btn" id="group-send-btn" title="Send to room" aria-label="Send">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/js/group.js"></script>
+</body>
+</html>

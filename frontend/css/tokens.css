@@ -1,0 +1,82 @@
+:root {
+  /* Surface */
+  --color-bg:            #FAFAF9;
+  --color-surface:       #FFFFFF;
+  --color-surface-alt:   #F4F4F3;
+  --color-sidebar:       #F7F6F5;
+  --color-border:        #E3E2E0;
+  --color-border-strong: #C9C7C4;
+
+  /* Text */
+  --color-text:          #1F2124;
+  --color-text-muted:    #5B5E63;
+  --color-text-faint:    #8A8D91;
+
+  /* Single accent — used sparingly */
+  --color-accent:        #2F5FDB;
+  --color-accent-hover:  #2851BE;
+  --color-accent-subtle: #EAF0FE;
+
+  /* Semantic */
+  --color-danger:        #B3261E;
+  --color-danger-subtle: #FBEAE9;
+  --color-success:       #1E7A4C;
+  --color-success-subtle:#E6F4EA;
+
+  /* Type */
+  --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+  --fs-xs: 0.75rem;   /* 12px */
+  --fs-sm: 0.875rem;  /* 14px */
+  --fs-base: 1rem;    /* 16px */
+  --fs-lg: 1.125rem;  /* 18px */
+  --fs-xl: 1.5rem;    /* 24px */
+
+  /* Spacing scale (4px base) */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
+  --sp-7: 48px;
+
+  /* Radius */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+
+  /* Shadow */
+  --shadow-1: 0 1px 2px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.08);
+  --shadow-2: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+
+  /* Transitions */
+  --transition-fast: 140ms ease-out;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg:            #121316;
+    --color-surface:       #1B1C20;
+    --color-surface-alt:   #23252A;
+    --color-sidebar:       #16171B;
+    --color-border:        #2E3138;
+    --color-border-strong: #454952;
+
+    --color-text:          #F0F1F3;
+    --color-text-muted:    #9DA1A8;
+    --color-text-faint:    #656972;
+
+    --color-accent:        #4C7BFE;
+    --color-accent-hover:  #3D6DE8;
+    --color-accent-subtle: #1C2640;
+
+    --color-danger:        #E25248;
+    --color-danger-subtle: #3D1C1A;
+    --color-success:       #34A853;
+    --color-success-subtle:#183623;
+
+    --shadow-1: 0 1px 2px rgba(0,0,0,0.3), 0 1px 3px rgba(0,0,0,0.4);
+    --shadow-2: 0 4px 6px -1px rgba(0,0,0,0.4), 0 2px 4px -1px rgba(0,0,0,0.3);
+  }
+}

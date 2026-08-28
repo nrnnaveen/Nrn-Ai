@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: nrn-ai
+    env: python
+    region: oregon
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: AI_MODEL
+        value: nvidia/nemotron-3-super-120b-a12b:free
+      - key: SECRET_KEY
+        generateValue: true
