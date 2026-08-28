@@ -43,5 +43,14 @@
     "created_at": "2026-08-28T06:16:43.278901+00:00",
     "updated_at": "2026-08-28T06:18:21.538622+00:00",
     "message_count": 4
+  },
+  {
+    "id": "f6d9d51f-537d-4133-ac56-7885f0c342bb",
+    "owner_id": "849d4a8e-ac40-4dff-97eb-662b1478949e",
+    "title": "hii",
+    "model": "nvidia/nemotron-3-super-120b-a12b:free",
+    "created_at": "2026-08-28T09:29:34.504300+00:00",
+    "updated_at": "2026-08-28T09:29:36.154810+00:00",
+    "message_count": 2
   }
 ]

@@ -148,5 +148,27 @@
       "created_at": "2026-08-28T06:18:21.537312+00:00",
       "updated_at": null
     }
+  ],
+  "f6d9d51f-537d-4133-ac56-7885f0c342bb": [
+    {
+      "id": "7f92de3f-9bbe-4156-8c50-3a63d0709300",
+      "conversation_id": "f6d9d51f-537d-4133-ac56-7885f0c342bb",
+      "role": "user",
+      "content": "hii",
+      "attachments": [],
+      "model": "nvidia/nemotron-3-super-120b-a12b:free",
+      "created_at": "2026-08-28T09:29:34.569002+00:00",
+      "updated_at": null
+    },
+    {
+      "id": "da477bd9-d5e9-4730-b794-50c0995b192e",
+      "conversation_id": "f6d9d51f-537d-4133-ac56-7885f0c342bb",
+      "role": "assistant",
+      "content": "Hello! 👋 How can I help you today?",
+      "attachments": [],
+      "model": "nvidia/nemotron-3-super-120b-a12b:free",
+      "created_at": "2026-08-28T09:29:36.149895+00:00",
+      "updated_at": null
+    }
   ]
 }
