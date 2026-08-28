@@ -7,11 +7,14 @@ from fastapi.testclient import TestClient
 from backend.main import app
 from backend.config import settings
 
+from backend.middleware.rate_limit import RateLimitMiddleware
+
 client = TestClient(app)
 
 @pytest.fixture(autouse=True)
 def clean_data_dir(tmp_path, monkeypatch):
     """Isolates data storage per test run in a temporary test directory."""
+    RateLimitMiddleware.reset()
     test_data_dir = tmp_path / "data"
     test_uploads_dir = test_data_dir / "uploads"
     test_feedback_file = tmp_path / "feedback.txt"
@@ -369,3 +372,57 @@ def test_frontend_secret_audit():
             for pattern in forbidden_patterns:
                 match = re.search(pattern, content)
                 assert match is None, f"Security Violation: Secret pattern '{pattern}' found in frontend file {file_path}"
+
+# ==========================================
+# 9. SECURITY HEADERS VERIFICATION
+# ==========================================
+
+def test_security_headers():
+    res = client.get("/")
+    assert res.status_code == 200
+    assert res.headers.get("X-Content-Type-Options") == "nosniff"
+    assert res.headers.get("X-Frame-Options") == "DENY"
+    assert res.headers.get("Referrer-Policy") == "strict-origin-when-cross-origin"
+    assert "Content-Security-Policy" in res.headers
+
+# ==========================================
+# 10. PATH TRAVERSAL DEFENSE
+# ==========================================
+
+def test_path_traversal_rejection():
+    res_user = client.post("/api/auth/register", json={
+        "username": "pathtester",
+        "email": "path@example.com",
+        "password": "Password123!"
+    })
+    token = res_user.json()["access_token"]
+    headers = {"Authorization": f"Bearer {token}"}
+
+    # Attempting to fetch with traversal payload
+    res = client.get("/api/uploads/../../etc/passwd", headers=headers)
+    assert res.status_code == 404
+
+# ==========================================
+# 11. IMAGE MAGIC BYTES VALIDATION
+# ==========================================
+
+def test_image_magic_bytes_validation():
+    res_user = client.post("/api/auth/register", json={
+        "username": "magictester",
+        "email": "magic@example.com",
+        "password": "Password123!"
+    })
+    token = res_user.json()["access_token"]
+    headers = {"Authorization": f"Bearer {token}"}
+
+    # Spoofed PNG file with text content
+    fake_png = {"file": ("malicious.png", b"fake binary payload not png", "image/png")}
+    res = client.post("/api/conversations/new/upload", files=fake_png, headers=headers)
+    assert res.status_code == 400
+    assert "header does not match" in res.json()["detail"]
+
+    # Real PNG with authentic magic bytes
+    valid_png_bytes = b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15c4"
+    valid_png = {"file": ("valid.png", valid_png_bytes, "image/png")}
+    res_ok = client.post("/api/conversations/new/upload", files=valid_png, headers=headers)
+    assert res_ok.status_code == 200

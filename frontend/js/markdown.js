@@ -1,8 +1,8 @@
 import { icons } from './ui.js';
 
 /**
- * Robust, safe markdown parser with syntax highlighting and Copy button.
- * Fully sanitizes HTML to prevent XSS.
+ * Robust, secure markdown parser with syntax highlighting and Copy button.
+ * Fully sanitizes HTML and enforces protocol allowlists on links to prevent XSS.
  */
 
 function escapeRawHtml(str) {
@@ -12,6 +12,16 @@ function escapeRawHtml(str) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
+}
+
+function sanitizeUrl(rawUrl) {
+  if (!rawUrl) return '';
+  const trimmed = rawUrl.trim();
+  // Strictly allow http, https, mailto, and relative paths. Block javascript:, data:, vbscript:
+  if (/^(https?:\/\/|\/|mailto:)/i.test(trimmed)) {
+    return escapeRawHtml(trimmed);
+  }
+  return '#';
 }
 
 function highlightSyntax(code, lang) {
@@ -71,7 +81,6 @@ export function renderMarkdown(markdownText) {
     };
 
     const headerCells = parseRow(lines[0]);
-    // Skip separator line (line 1)
     const bodyRows = lines.slice(2).map(parseRow);
 
     let html = '<table><thead><tr>';
@@ -107,7 +116,13 @@ export function renderMarkdown(markdownText) {
   // 7. Inline code
   processed = processed.replace(/`([^`]+)`/g, '<code>$1</code>');
 
-  // 8. Unordered Lists
+  // 8. Markdown Links (Secure URL validation)
+  processed = processed.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (match, linkText, url) => {
+    const safeHref = sanitizeUrl(url);
+    return `<a href="${safeHref}" target="_blank" rel="noopener noreferrer" class="markdown-link">${linkText}</a>`;
+  });
+
+  // 9. Unordered Lists
   processed = processed.replace(/(?:^[ \t]*[\*\-][ \t]+(.*?)(?:\r?\n|$))+/gm, (listMatch) => {
     const items = listMatch.trim().split('\n').map(item => {
       return `<li>${item.replace(/^[ \t]*[\*\-][ \t]+/, '')}</li>`;
@@ -115,7 +130,7 @@ export function renderMarkdown(markdownText) {
     return `<ul>${items}</ul>`;
   });
 
-  // 9. Ordered Lists
+  // 10. Ordered Lists
   processed = processed.replace(/(?:^[ \t]*\d+\.[ \t]+(.*?)(?:\r?\n|$))+/gm, (listMatch) => {
     const items = listMatch.trim().split('\n').map(item => {
       return `<li>${item.replace(/^[ \t]*\d+\.[ \t]+/, '')}</li>`;
@@ -123,7 +138,7 @@ export function renderMarkdown(markdownText) {
     return `<ol>${items}</ol>`;
   });
 
-  // 10. Paragraphs & Line Breaks
+  // 11. Paragraphs & Line Breaks
   const paragraphs = processed.split(/\n{2,}/);
   processed = paragraphs.map(p => {
     p = p.trim();
@@ -136,7 +151,7 @@ export function renderMarkdown(markdownText) {
     return `<p>${p.replace(/\n/g, '<br>')}</p>`;
   }).join('');
 
-  // 11. Reinsert Code Blocks with Copy button and syntax highlighting
+  // 12. Reinsert Code Blocks with Copy button and syntax highlighting
   codeBlocks.forEach((block, idx) => {
     const placeholder = `%%CODE_BLOCK_${idx}%%`;
     const highlighted = highlightSyntax(block.code, block.lang);

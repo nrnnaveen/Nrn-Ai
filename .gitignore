@@ -1,8 +1,20 @@
-.env
+# Python
 .venv/
 __pycache__/
 *.pyc
+*.pyo
 .pytest_cache/
+
+# Environment & Secrets
+.env
+*.env.local
+
+# Application Data & Uploads
+data/*.json
 data/uploads/*
 !data/uploads/.gitkeep
+feedback.txt
+
+# OS
 .DS_Store
+Thumbs.db

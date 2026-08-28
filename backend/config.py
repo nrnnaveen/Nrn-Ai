@@ -1,31 +1,45 @@
 import os
+import secrets
+import logging
 from pathlib import Path
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Union
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import field_validator
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+logger = logging.getLogger("nrn_ai.config")
 
 class Settings(BaseSettings):
     APP_NAME: str = "NRN AI"
+    ENV: str = "development" # "development", "production", "testing"
     OPENROUTER_API_KEY: str = ""
     AI_MODEL: str = "nvidia/nemotron-3-super-120b-a12b:free"
     SECRET_KEY: str = "nrn-ai-insecure-default-change-in-production-key-2026"
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440  # 24 hours
     
+    # CORS & Security
+    ALLOWED_ORIGINS: List[str] = [
+        "http://localhost:8000",
+        "http://127.0.0.1:8000",
+        "http://0.0.0.0:8000"
+    ]
+    SECURE_COOKIES: bool = False
+    
     # Storage paths
     DATA_DIR: Path = BASE_DIR / "data"
     UPLOADS_DIR: Path = BASE_DIR / "data" / "uploads"
     FEEDBACK_FILE: Path = BASE_DIR / "feedback.txt"
     
-    # Rate limits
+    # Rate limits (requests per minute)
     RATE_LIMIT_AUTH_PER_MINUTE: int = 20
     RATE_LIMIT_MESSAGES_PER_MINUTE: int = 60
     RATE_LIMIT_UPLOADS_PER_MINUTE: int = 20
     RATE_LIMIT_FEEDBACK_PER_MINUTE: int = 10
     
-    # Upload limits
-    MAX_UPLOAD_SIZE_BYTES: int = 10 * 1024 * 1024  # 10 MB
+    # Request & Upload limits
+    MAX_REQUEST_BODY_BYTES: int = 2 * 1024 * 1024       # 2 MB for standard JSON requests
+    MAX_UPLOAD_SIZE_BYTES: int = 10 * 1024 * 1024       # 10 MB for file uploads
     ALLOWED_IMAGE_TYPES: List[str] = ["image/jpeg", "image/png", "image/gif", "image/webp"]
     ALLOWED_DOC_TYPES: List[str] = ["text/plain", "application/pdf", "text/markdown", "text/csv", "application/json"]
     
@@ -184,3 +198,10 @@ class Settings(BaseSettings):
     )
 
 settings = Settings()
+
+# Validate Secret Key strength on startup
+if settings.SECRET_KEY == "nrn-ai-insecure-default-change-in-production-key-2026":
+    if settings.ENV == "production":
+        logger.critical("SECURITY WARNING: Using default SECRET_KEY in production! Generate a random secret immediately.")
+    else:
+        logger.warning("Using default development SECRET_KEY. Set SECRET_KEY in .env for production.")

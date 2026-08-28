@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from backend.config import settings
 from backend.middleware.rate_limit import RateLimitMiddleware
+from backend.middleware.security_headers import SecurityHeadersMiddleware
 from backend.auth.routes import router as auth_router
 from backend.routes.users import router as users_router
 from backend.routes.conversations import router as conversations_router
@@ -48,14 +49,19 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# Middleware
+# 1. Security Headers & Payload Size Limits
+app.add_middleware(SecurityHeadersMiddleware)
+
+# 2. CORS Middleware with Explicit Origin Allowlist
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=settings.ALLOWED_ORIGINS,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
+
+# 3. Rate Limiting Middleware
 app.add_middleware(RateLimitMiddleware)
 
 # Global Exception Handler to prevent stack trace leakage
